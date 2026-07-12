@@ -23,10 +23,22 @@ BINARY="$APP/Contents/MacOS/$BIN_NAME"
 
 [ -f "$BINARY" ] || { echo "error: binary not found at $BINARY" >&2; exit 1; }
 
-RESPONSE="$(curl -fsS "$API/studio-patcher/globals/$VERSION")" || {
-  echo "error: no globals published for build $VERSION yet, try again later" >&2
+HTTP="$(curl -sS -w '\n%{http_code}' "$API/studio-patcher/globals/$VERSION")"
+CODE="${HTTP##*$'\n'}"
+RESPONSE="${HTTP%$'\n'*}"
+
+if [ "$CODE" != "200" ]; then
+  VERSIONS="$(grep -o '"versions":\[[^]]*\]' <<<"$RESPONSE" | grep -o '"[^"]*"' | tail -n +2 | tr -d '"' | paste -sd, -)"
+  echo "error: no globals published for build $VERSION" >&2
+  if [ -n "$VERSIONS" ]; then
+    echo "supported versions right now: $VERSIONS" >&2
+    echo "grab one of those from https://rdd.latte.to/ and rerun this against it" >&2
+  else
+    echo "nothing published yet at all, try again later" >&2
+  fi
   exit 1
-}
+fi
+
 GLOBALS="$(grep -o '0x[0-9a-fA-F]*' <<<"$RESPONSE" | paste -sd, -)"
 [ -n "$GLOBALS" ] || { echo "error: bad response from $API" >&2; exit 1; }
 
