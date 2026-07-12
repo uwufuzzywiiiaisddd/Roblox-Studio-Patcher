@@ -1,0 +1,15 @@
+[package]
+name = "studio-patcher"
+version = "0.1.0"
+edition = "2026"
+
+[[bin]]
+name = "studio-patcher"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"
+
+[profile.release]
+opt-level = 3
