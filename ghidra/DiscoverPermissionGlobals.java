@@ -5,6 +5,9 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Data;
 import ghidra.program.model.listing.DataIterator;
 import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.listing.InstructionIterator;
+import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.ReferenceIterator;
 import ghidra.util.task.ConsoleTaskMonitor;
 
@@ -21,12 +24,21 @@ public class DiscoverPermissionGlobals extends GhidraScript {
         return res.decompileCompleted() ? res.getDecompiledFunction().getC() : null;
     }
 
-    boolean looksLikeGate(String c) {
-        if (c == null) return false;
-        Matcher m = Pattern.compile("DAT_[0-9a-fA-F]+").matcher(c);
-        int hits = 0;
-        while (m.find()) hits++;
-        return hits >= 1 && c.contains("&");
+    LinkedHashSet<Long> gateGlobals(Function f) {
+        LinkedHashSet<Long> addrs = new LinkedHashSet<>();
+        boolean hasAnd = false;
+        InstructionIterator it = currentProgram.getListing().getInstructions(f.getBody(), true);
+        while (it.hasNext()) {
+            Instruction insn = it.next();
+            String mnem = insn.getMnemonicString();
+            if (mnem.equals("ldrb")) {
+                for (Reference r : insn.getReferencesFrom()) {
+                    addrs.add(r.getToAddress().getOffset());
+                }
+            }
+            if (mnem.equals("and")) hasAnd = true;
+        }
+        return (hasAnd && !addrs.isEmpty()) ? addrs : new LinkedHashSet<>();
     }
 
     @Override
@@ -50,6 +62,7 @@ public class DiscoverPermissionGlobals extends GhidraScript {
         println("found string at 0x" + strAddr);
 
         Function bestGate = null;
+        LinkedHashSet<Long> bestGlobals = null;
         ReferenceIterator refs = currentProgram.getReferenceManager().getReferencesTo(strAddr);
         while (refs.hasNext()) {
             Function registrar = getFunctionContaining(refs.next().getFromAddress());
@@ -72,11 +85,11 @@ public class DiscoverPermissionGlobals extends GhidraScript {
                             Function target = real.getThunkedFunction(true);
                             if (target != null) real = target;
                         }
-                        String candText = decompile(real);
-                        if (looksLikeGate(candText)) {
+                        LinkedHashSet<Long> globals = gateGlobals(real);
+                        if (!globals.isEmpty()) {
                             println("candidate gate: " + name + " -> " + real.getName() + " @ " + real.getEntryPoint());
-                            println(candText);
                             bestGate = real;
+                            bestGlobals = globals;
                         }
                     }
                 }
@@ -88,9 +101,11 @@ public class DiscoverPermissionGlobals extends GhidraScript {
             return;
         }
 
-        LinkedHashSet<String> addrs = new LinkedHashSet<>();
-        Matcher m = Pattern.compile("DAT_([0-9a-fA-F]+)").matcher(decompile(bestGate));
-        while (m.find()) addrs.add(m.group(1));
-        println("RESULT: GLOBALS=" + String.join(",", addrs));
+        StringBuilder sb = new StringBuilder();
+        for (Long a : bestGlobals) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(Long.toHexString(a));
+        }
+        println("RESULT: GLOBALS=" + sb);
     }
 }
