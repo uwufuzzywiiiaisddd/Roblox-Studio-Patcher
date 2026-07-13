@@ -67,11 +67,16 @@ public class DiscoverPermissionGlobals extends GhidraScript {
                         cands = getGlobalFunctions(name.substring("thunk_".length()));
                     }
                     for (Function cand : cands) {
-                        String candText = decompile(cand);
+                        Function real = cand;
+                        if (real.isThunk()) {
+                            Function target = real.getThunkedFunction(true);
+                            if (target != null) real = target;
+                        }
+                        String candText = decompile(real);
                         if (looksLikeGate(candText)) {
-                            println("candidate gate: " + name + " @ " + cand.getEntryPoint());
+                            println("candidate gate: " + name + " -> " + real.getName() + " @ " + real.getEntryPoint());
                             println(candText);
-                            bestGate = cand;
+                            bestGate = real;
                         }
                     }
                 }
