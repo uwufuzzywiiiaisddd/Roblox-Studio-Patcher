@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -6,7 +7,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(name = "studio-patcher", version)]
 struct Args {
     #[arg(long)]
@@ -664,6 +665,28 @@ fn run_themes(macho_path: &Path, args: &Args) -> Result<()> {
     Ok(())
 }
 
+fn ask_yn(q: &str) -> bool {
+    print!("{q} [y/N] ");
+    let _ = io::stdout().flush();
+    let mut line: String = String::new();
+    io::stdin().read_line(&mut line).ok();
+    matches!(line.trim(), "y" | "Y" | "yes")
+}
+
+fn run_auto(macho_path: &Path, args: &Args) -> Result<()> {
+    let mut globals_args: Args = args.clone();
+    globals_args.globals = vec!["auto".to_string()];
+    if let Err(e) = run_globals(macho_path, &globals_args) {
+        println!("permission patch failed ({e}) - probably already patched");
+    }
+
+    println!("custom themes work by patching the binary to load theme jsons off disk");
+    if ask_yn("enable custom theme support?") {
+        run_themes(macho_path, args)?;
+    }
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let args: Args = Args::parse();
     let target: PathBuf = args
@@ -692,7 +715,7 @@ fn main() -> Result<()> {
         did_something = true;
     }
     if !did_something {
-        bail!("need --signature/--patch, --globals, --themes, or --discover")
+        run_auto(&macho_path, &args)?;
     }
     Ok(())
 }

@@ -1,4 +1,4 @@
-# studio-internal-patcher
+# Roblox-Studio-Patcher
 
 Patches RobloxStudio.app so `HasInternalPermission` always returns true.
 
@@ -10,14 +10,15 @@ Related: the command bar's script identity system has an `ElevatedStudioPlugin` 
 
 ## Usage
 
+Grab `Roblox-Studio-Patcher-mac-silicon` from [releases](https://github.com/uwufuzzywiiiaisddd/Roblox-Studio-Patcher/releases), then:
+
 ```bash
-./auto_patch.sh                          # patches /Applications/RobloxStudio.app
-./auto_patch.sh /path/to/RobloxStudio.app # or a custom path
+chmod +x Roblox-Studio-Patcher-mac-silicon
+./Roblox-Studio-Patcher-mac-silicon                          # patches /Applications/RobloxStudio.app
+./Roblox-Studio-Patcher-mac-silicon --binary /path/to/RobloxStudio.app # or a custom path
 ```
 
-Requires macOS + arm64 Studio. It'll install Homebrew and Rust itself if you don't have them.
-
-If your exact build isn't supported yet, it'll tell you which ones are and offer to force-patch with the latest anyway (safe - it just fails cleanly if the addresses don't match).
+Requires macOS + arm64 Studio.
 
 A backup of the original binary is made before every patch (`RobloxStudio.bak-<timestamp>`, next to the original).
 
@@ -25,15 +26,22 @@ mac/arm only rn cuz i wanted to learn arm. ill probably get around to a windows 
 
 ## Custom themes
 
-`auto_patch.sh` will ask if you want this too, or just run:
+The default run asks if you want this too, or just run it standalone:
 
 ```bash
-./target/release/studio-patcher --binary /Applications/RobloxStudio.app --themes
+./Roblox-Studio-Patcher-mac-silicon --binary /Applications/RobloxStudio.app --themes
 ```
 
 redirects studio's theme jsons to `/Users/Shared/rbx-theme-set/` instead of loading them baked into the binary, so you can just edit em and relaunch, grabs the stock jsons for you on first run so you've got something to start from.
 
 edit `FoundationDarkTheme.json` and `FoundationLightTheme.json` in that folder, whichever one studio's actually using, then just relaunch studio to see it
+
+## Building from source
+
+```bash
+cargo build --release
+./target/release/studio-patcher
+```
 
 ## Issues
 
