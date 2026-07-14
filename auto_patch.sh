@@ -21,7 +21,7 @@ BINARY="$APP/Contents/MacOS/$BIN_NAME"
 
 [ -f "$BINARY" ] || { echo "error: binary not found at $BINARY" >&2; exit 1; }
 
-"$STUDIO_PATCHER" --binary "$APP" --globals auto
+"$STUDIO_PATCHER" --binary "$APP" --globals auto || echo "permission patch step failed (see above) - if it's already patched, that's fine, continuing to theme support" >&2
 
 REPLY=""
 if [ -r /dev/tty ]; then
