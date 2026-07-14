@@ -75,3 +75,10 @@ GLOBALS="$(grep -o '0x[0-9a-fA-F]*' <<<"$RESPONSE" | paste -sd, -)"
 [ -n "$GLOBALS" ] || { echo "error: bad response from $API" >&2; exit 1; }
 
 "$STUDIO_PATCHER" --binary "$APP" --globals "$GLOBALS"
+
+REPLY=""
+if [ -r /dev/tty ]; then
+  echo "custom themes work by patching the binary to load theme jsons off disk" >&2
+  read -r -p "enable custom theme support? [y/N] " REPLY < /dev/tty
+fi
+[[ "$REPLY" =~ ^[Yy]$ ]] && "$STUDIO_PATCHER" --binary "$APP" --themes

@@ -23,7 +23,17 @@ A backup of the original binary is made before every patch (`RobloxStudio.bak-<t
 
 mac/arm only rn cuz i wanted to learn arm. ill probably get around to a windows x86 version eventually if [7ap's patcher](https://github.com/7ap/internal-studio-patcher) remains archived, ngl arm is kinda mid tho
 
-probably gonna add custom theme support at some point too, no eta tho
+## Custom themes
+
+`auto_patch.sh` will ask if you want this too, or just run:
+
+```bash
+./target/release/studio-patcher --binary /Applications/RobloxStudio.app --themes
+```
+
+redirects studio's theme jsons to `/Users/Shared/rbx-theme-set/` instead of loading them baked into the binary, so you can just edit em and relaunch, grabs the stock jsons for you on first run so you've got something to start from.
+
+edit `FoundationDarkTheme.json` and `FoundationLightTheme.json` in that folder, whichever one studio's actually using, then just relaunch studio to see it
 
 ## Issues
 

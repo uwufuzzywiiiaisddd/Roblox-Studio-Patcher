@@ -36,7 +36,8 @@ public class DiscoverPermissionGlobals extends GhidraScript {
                     addrs.add(r.getToAddress().getOffset());
                 }
             }
-            if (mnem.equals("and")) hasAnd = true;
+            if (mnem.equals("and"))
+                hasAnd = true;
         }
         return (hasAnd && !addrs.isEmpty()) ? addrs : new LinkedHashSet<>();
     }
@@ -66,12 +67,15 @@ public class DiscoverPermissionGlobals extends GhidraScript {
         ReferenceIterator refs = currentProgram.getReferenceManager().getReferencesTo(strAddr);
         while (refs.hasNext()) {
             Function registrar = getFunctionContaining(refs.next().getFromAddress());
-            if (registrar == null) continue;
+            if (registrar == null)
+                continue;
             String regText = decompile(registrar);
-            if (regText == null) continue;
+            if (regText == null)
+                continue;
 
             for (String line : regText.split("\n")) {
-                if (!line.contains("HasInternalPermission")) continue;
+                if (!line.contains("HasInternalPermission"))
+                    continue;
                 Matcher tok = Pattern.compile("(thunk_)?FUN_[0-9a-fA-F]+").matcher(line);
                 while (tok.find()) {
                     String name = tok.group();
@@ -83,7 +87,8 @@ public class DiscoverPermissionGlobals extends GhidraScript {
                         Function real = cand;
                         if (real.isThunk()) {
                             Function target = real.getThunkedFunction(true);
-                            if (target != null) real = target;
+                            if (target != null)
+                                real = target;
                         }
                         LinkedHashSet<Long> globals = gateGlobals(real);
                         if (!globals.isEmpty()) {
@@ -103,7 +108,8 @@ public class DiscoverPermissionGlobals extends GhidraScript {
 
         StringBuilder sb = new StringBuilder();
         for (Long a : bestGlobals) {
-            if (sb.length() > 0) sb.append(",");
+            if (sb.length() > 0)
+                sb.append(",");
             sb.append(Long.toHexString(a));
         }
         println("RESULT: GLOBALS=" + sb);
