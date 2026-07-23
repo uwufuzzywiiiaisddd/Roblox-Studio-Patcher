@@ -1,6 +1,6 @@
 # Roblox-Studio-Patcher
 
-Patches RobloxStudio.app so `HasInternalPermission` always returns true.
+Patches Roblox Studio so `HasInternalPermission` always returns true. mac + windows.
 
 ## What this actually does
 
@@ -10,7 +10,9 @@ Related: the command bar's script identity system has an `ElevatedStudioPlugin` 
 
 ## Usage
 
-Grab `Roblox-Studio-Patcher-mac-silicon` from [releases](https://github.com/uwufuzzywiiiaisddd/Roblox-Studio-Patcher/releases), then:
+Grab the build for your OS from [releases](https://github.com/uwufuzzywiiiaisddd/Roblox-Studio-Patcher/releases).
+
+**mac (arm64):**
 
 ```bash
 chmod +x Roblox-Studio-Patcher-mac-silicon
@@ -18,21 +20,21 @@ chmod +x Roblox-Studio-Patcher-mac-silicon
 ./Roblox-Studio-Patcher-mac-silicon --binary /path/to/RobloxStudio.app # or a custom path
 ```
 
-Requires macOS + arm64 Studio.
+**windows:**
 
-A backup of the original binary is made before every patch (`RobloxStudio.bak-<timestamp>`, next to the original).
+```cmd
+Roblox-Studio-Patcher-windows.exe
+```
 
-mac/arm only rn cuz i wanted to learn arm. ill probably get around to a windows x86 version eventually if [7ap's patcher](https://github.com/7ap/internal-studio-patcher) remains archived, ngl arm is kinda mid tho
+just run it, no install needed. finds your Studio install under `%LOCALAPPDATA%\Roblox\Versions` on its own, or pass `--binary path\to\RobloxStudioBeta.exe`.
+
+A backup of the original binary is made before every patch (next to the original, `.bak-<timestamp>` on mac / same idea on windows).
 
 ## Custom themes
 
-The default run asks if you want this too, or just run it standalone:
+The default run asks if you want this too, or just run it standalone with `--themes`.
 
-```bash
-./Roblox-Studio-Patcher-mac-silicon --binary /Applications/RobloxStudio.app --themes
-```
-
-redirects studio's theme jsons to `/Users/Shared/rbx-theme-set/` instead of loading them baked into the binary, so you can just edit em and relaunch, grabs the stock jsons for you on first run so you've got something to start from.
+redirects studio's theme jsons to a folder on disk instead of loading them baked into the binary (`/Users/Shared/rbx-theme-set/` on mac, `C:\Users\Public\rbxthemeset` on windows), so you can just edit em and relaunch. grabs the stock jsons for you on first run so you've got something to start from.
 
 edit `FoundationDarkTheme.json` and `FoundationLightTheme.json` in that folder, whichever one studio's actually using, then just relaunch studio to see it
 
@@ -42,6 +44,8 @@ edit `FoundationDarkTheme.json` and `FoundationLightTheme.json` in that folder, 
 cargo build --release
 ./target/release/studio-patcher
 ```
+
+for a windows build from mac/linux you need the target + mingw (`rustup target add x86_64-pc-windows-gnu`, `brew install mingw-w64`), then `cargo build --release --target x86_64-pc-windows-gnu`.
 
 ## Issues
 
