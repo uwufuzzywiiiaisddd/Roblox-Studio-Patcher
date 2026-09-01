@@ -94,7 +94,7 @@ pub fn rule(width: usize) -> String {
 pub fn banner() {
     let version = env!("CARGO_PKG_VERSION");
     let subtitle = format!(
-        "studio internal-mode{sep}themes{sep}native hooks{sep}mac + windows",
+        "studio internal-mode{sep}themes{sep}native hooks{sep}mac + windows + linux",
         sep = glyph::SEP
     );
     println!();
